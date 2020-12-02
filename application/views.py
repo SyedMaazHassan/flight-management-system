@@ -10,6 +10,8 @@ import os
 
 # main page function
 
+
+
 def index(request):
     if not request.user.is_authenticated:
         return redirect("login")
@@ -61,7 +63,6 @@ def create_account(request):
                 print("Email already taken")
                 messages.info(request, "Entered email already in use!")
                 return redirect("signup/"+status)
-
 
             # actual creating accounts
             user = User.objects.create_user(username=email, first_name=name, password=pass1, last_name=l_name)
