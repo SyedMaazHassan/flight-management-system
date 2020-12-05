@@ -1,0 +1,85 @@
+{% include 'inc/head.inc.html' %}
+
+{% include 'inc/navbar.inc.html' %}
+
+<body style="background-color: #ffffff;">
+    <div class="row" style="width: 100%;">
+        <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 90vh">
+            <div class="my-form my-5" id="mainDiv">
+                <h3 class="text-info">Registration</h3>
+                <form autocomplete="off" style="text-align:center; margin-top: 30px;" action="create-account" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="{{status}}">
+                    <input class="field form-control" id="name" name="name" type="text" value="{{name}}" placeholder="First name" required>
+                    <input class="field form-control" id="l_name" name="l_name" type="text" value="{{l_name}}" placeholder="Last name" required>
+                    <input class="field form-control" id="email" name="email" type="email" value="{{email}}" placeholder="Email" required>
+
+
+                    {% ifequal status 'customer' %}
+
+                        <input type="number" name="contact_number" class="field form-control" placeholder="Contact Number" required>
+                        <select name="gender" id="" class="field form-control" required>
+                            <option value="">Select your gender</option>
+                            <option value="Female">Male</option>
+                            <option value="Male">Female</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    {% endifequal %}
+
+
+
+
+                    {% ifequal status 'airline-staff' %}
+
+                    <div class="form-group">
+                        <select class="form-control field" name="airline" required>
+                            <option value="">Select your airline</option>
+                            {% for airline in all_airlines %}
+                                <option value="{{airline.id}}">{{airline.name}} <b>({{airline.country}})</b></option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% endifequal %}
+
+                    <input class="field form-control" id="pass1" name="pass1" type="password" value="{{pass1}}" placeholder="Password" required>
+                    <input class="field form-control" id="pass2" name="pass2" type="password" value="{{pass2}}" placeholder="Confirm Password" required>
+                    <p id="error" 
+                        style="
+                            text-align: left; 
+                            transition-duration:0.25s;
+                            color:#ed4337;"
+                        >
+                        {% for message in messages %}
+                            {{message}}
+                        {% endfor %}
+                    </p>
+                    <button class="btn btn-block btn-info" type="submit">SIGNUP</button>        
+                    <p class="my-4">Already registered?</p>
+                    <a href="{% url 'login' %}"><button class="btn btn-block btn-secondary" type="button">LOGIN</button></a>
+                    <br>        
+                </form>
+            </div>
+        </div>
+    </div>    
+</body>
+
+<script>
+    var x = "{{border}}";
+    if(x=="email"){
+        $("#email").css(
+            'border-color', '#ed4337'
+        );
+    }else if(x=="password"){
+        $("#pass1, #pass2").css(
+            'border-color', '#ed4337'
+        );
+    }else if(x=="phone"){
+        $("#username").css(
+            'border-color', '#ed4337'
+        );
+    };
+
+</script>
+
+</html>

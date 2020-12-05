@@ -1,0 +1,239 @@
+{% load static %}
+
+{% include 'inc/head.inc.html' %}
+{% include 'inc/navbar.inc.html' %}
+
+<body>
+{#  modal for confirmation  #}
+    <div class="modal" id="statusmodal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Confirm status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                     </button>
+                </div>
+                <div class="modal-body">
+                  <p> <input type="text" disabled id="insert" size="2">
+                         This amount will be transferred to the booking agent</p>
+                    <p id="errors_p" class="text-danger"></p>
+
+                </div>
+                <div class="modal-footer">
+                    <a id="confirmation" class="btn btn-info">Confirm flight</a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+
+    <div class="container mt-3 mb-3 text-right"  >
+
+        <a class="btn btn-info" href="{% url 'UI:all_flights' 'all_Flights' %}">All Flights</a>
+        <a href="{% url 'UI:my_tickets' %}" class="btn btn-info"  >My flights</a>
+    </div>
+
+    {% block check %}
+    <div class="container my-4">
+        <form action="{% url 'UI:home' %}" method="GET" id="form_list" class=" d-flex justify-content-between">
+{#            {{ search.form }}#}
+        <div>
+            <label for="d_time">Departure time:</label>
+            <input type="datetime-local" value="{{ time1 }}" id="d_time"
+                   name="departure_time" class="form-control">
+        </div>
+        <div>
+            <label for="a_time">Arrival time:</label>
+            <input type="datetime-local" value="{{ time2 }}" id="a_time"
+                   name="arrival_time" class="form-control" >
+        </div>
+
+            <div>
+                <label for="">Departure Airport:</label>
+                <select name="departure_airport" id=""  class="form-control" >
+                    <option value="">Departure airport</option>
+                    {% for airport in airports %}
+                        <option value="{{ airport.city }}">{{ airport.city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+            <label for="">Arrival Airport:</label>
+            <select name="arrival_airport" id=""  class="form-control" >
+                <option value="">Arrival airport</option>
+                {% for airport in airports %}
+                    <option value="{{ airport.city }}" >{{ airport.city }}</option>
+                {% endfor %}
+            </select>
+            </div>
+            <div class="align-self-end">
+                <a href="{% url 'UI:home' %}" class="btn btn-secondary ">Remove Filters</a>
+                <button class="btn btn-info ">Apply</button>
+            </div>
+        </form>
+    </div>
+    {% endblock %}
+    {% if total_amount %}
+        <div class="container my-4">
+            {% if total_amount.agent_spend %}
+                <h3>Total amount spent: {{ total_amount.agent_spend }}$</h3>
+
+            {% elif total_amount.customer_spend %}
+                    <h3>Total amount spent: {{ total_amount.customer_spend }}$</h3>
+
+            {% endif %}
+                    <h3>Remaining: {{ remaining_amount }}$</h3>
+{#                    <a  class="btn btn-info">Add Credit to your account</a>#}
+        </div>
+    {% endif %}
+
+    {% block content %}
+        {% if flight_list %}
+            <div class="my-3">
+                <table class="table table-striped  container border" id="table_width">
+
+                <thead>
+                    <tr>
+                        <th>Flight Number</th>
+                        <th>Airline</th>
+                        <th>Departure Time</th>
+                        <th>Departure Airport</th>
+                        {# Not shown for customer but visible for agent #}
+                        {% ifnotequal user.username  customer.user.username %}
+
+                            <th>Details</th>
+                        {# shown for customer not for agent #}
+
+                        {% else %}
+                            {% if flight_list.items %}
+                                <th>Status</th>
+                            {% endif %}
+                        {% endifnotequal %}
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if flight_list.items %}
+{#      for dictionary of flight list with customer ticket status                  #}
+                    {% for pending, item in flight_list.items %}
+                        <tr >
+                            <td>
+                                {{ item.flight_num }}
+                            </td>
+                            <td>
+                                {{ item.airline }}
+                            </td>
+                            <td>
+                                {{ item.departure_time }}
+                            </td>
+                            <td>
+                                {{ item.departure_airport }}
+                            </td>
+                            {% ifnotequal user.username  customer.user.username %}
+                            <td>
+                                <a href="{% url 'UI:flight_detail' item.pk %}" class="btn btn-info">Details</a>
+                            </td>
+                            {% else %}
+                            {# customer status with conditional button #}
+                                <td>
+                                    {{ pending|slice:":7" }}
+                                    {% if pending|slice:":7"|last == 'g' %}
+                                    <button class="btn btn-info passing_value" onclick="my_function(event)"
+                                            name="{{ item.pk }}"
+                                            data-toggle="modal" value="{{ item.price }} " id="passing_value"
+                                            data-target="#statusmodal">Confirm</button>
+                                    {% else %}
+
+                                    {% endif %}
+
+                                </td>
+                            {% endifnotequal %}
+                        </tr>
+                    {% endfor %}
+{#      for simple flight list                  #}
+                    {% else %}
+                        {% for item in flight_list %}
+                        <tr >
+                            <td>
+                                {{ item.flight_num }}
+                            </td>
+                            <td>
+                                {{ item.airline }}
+                            </td>
+                            <td>
+                                {{ item.departure_time }}
+                            </td>
+                            <td>
+                                {{ item.departure_airport }}
+                            </td>
+                            {% ifnotequal user.username  customer.user.username %}
+                            <td>
+                                <a href="{% url 'UI:flight_detail' item.pk %}" class="btn btn-info">Details</a>
+                            </td>
+                            {% else %}
+{#                                {% if item.ticket_status %}#}
+                                <td>
+                                    {{ pending }}
+{#                                    <button><small>Confirm</small></button>#}
+                                </td>
+{#                                {% endif %}#}
+                            {% endifnotequal %}
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+
+            </table>
+            </div>
+        {% else %}
+            {% if purchase %}
+                <div class="alert alert-info text-center" role="alert">
+                    No flights purchased, <a href="{% url 'UI:all_flights' 'all_flights' %}">Purchase one now!!</a>
+                </div>
+            {% else %}
+            <div class="alert alert-info text-center my-4" role="alert">
+                No flights, Search now!!!!
+            </div>
+                {% endif %}
+        {% endif %}
+    {% endblock %}
+</body>
+<script>
+   const table_width = document.getElementById('table_width')
+   console.log(window.innerWidth)
+   if( window.innerWidth<720){
+       table_width.classList.add('table-responsive')
+   }
+   function my_function(e){
+       const insert_value = document.getElementById('insert')
+       insert_value.value = e.target.value+'$';
+       {# constructing url #}
+       let url = '{% url 'UI:customer_purchase' 1 12  %}'
+       let one_change = url.replace('1',e.target.name)
+       const two_change = one_change.replace(12,e.target.value)
+        document.getElementById('confirmation').href = two_change
+   }
+
+
+
+   let msg = `{% for msg in messages %}{{ msg }}{% endfor %}`
+    if (msg!==''){
+            document.getElementById('errors_p').innerText = msg
+            $('#statusmodal').modal('show')
+        setTimeout(()=>{
+            document.getElementById('errors_p').innerText = ''
+
+        },3000)
+
+
+    }
+
+</script>
+</html>

@@ -1,0 +1,12 @@
+
+@media (max-width: 720px) {
+    #detail_flight{
+    width:100%!important;
+        /*background-color: red;*/
+}
+}
+@media (max-width: 1024px){
+    #form_list{
+        display: block!important;
+    }
+}

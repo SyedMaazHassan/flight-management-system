@@ -1,0 +1,40 @@
+{% extends './main.html' %}
+
+{% block content %}
+{#    <button data-toggle="modal" data-target="#belowmodal">Launch</button>#}
+
+    <div class="modal" id="belowmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Purchase Ticket</h5>
+                </div>
+                <div class="modal-body">
+                    <form  method="POST" class="" >
+                        {% csrf_token %}
+                        <h2 class="text-center">Buy tickets</h2>
+
+                        <label for="">Customer Email</label>
+                        <input type="text" name="customer_email" placeholder="Customer Email" class="form-control">
+
+                        <label class="mt-3">Choose the flight</label>
+                        <select name="flight_information" id="" class="form-control">
+                            <option value="">Select your flight</option>
+                            {% for i in flights %}
+                                <option value="{{ i.id }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-info">Purchase</button>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+{% endblock %}

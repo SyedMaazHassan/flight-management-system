@@ -1,0 +1,101 @@
+{% extends 'main.html' %}
+
+{% block check %}
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="modal" id="belowmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Purchase Ticket</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                     </button>
+                </div>
+                <form method="POST" action="{% url 'UI:ticket_purchase' flight_detail.pk %}" class="" >
+
+                <div class="modal-body">
+                        {% csrf_token %}
+                        <h2 class="text-center">Buy tickets</h2>
+
+                        <label for="">Customer Email</label>
+                        <input type="text" name="customer_email"  placeholder="Customer Email" class="form-control">
+
+                        <label class="mt-3">Choose the flight</label>
+                        <select name="flight_information" id="" class="form-control">
+{#                            <option value="">Select your flight</option>#}
+                            {% for i in flights %}
+                                <option value="{{ i.id }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <p id="error_detail" class="text-danger"></p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-info">Purchase</button>
+                </div>
+                </form>
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="container" style="width: 50%" id="detail_flight">
+        <h3>Flight Number: {{ flight_detail.flight_num }}</h3>
+
+        <p>{{ flight_detail.airline }}</p>
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="m-0 text-info">From</p>
+                <p><strong>{{ flight_detail.departure_airport }}</strong></p>
+                <p class="m-0 text-info">To </p>
+                <p class=""> <strong> {{ flight_detail.arrival_airport }}</strong></p>
+                <h6>  Price: {{ flight_detail.price }}$</h6>
+
+            </div>
+
+            <div>
+                <p class="m-0 text-info">Leaving at: </p>
+                <p><strong> {{ flight_detail.departure_time }}</strong></p>
+
+                <p class="m-0 text-info">Arrival time: </p>
+                <p><strong>{{ flight_detail.arrival_time }}</strong></p>
+                <h5><div class="badge badge-success">Status: {{ flight_detail.status.capitalize }}</div></h5>
+
+            </div>
+
+        </div>
+
+
+       <button data-toggle="modal" data-target="#belowmodal" class="btn btn-info">Purchase for customer</button>
+
+{#        {% if user.is_staff %}#}
+{#            <a href="{% url 'UI:ticket_purchase' %}" class="btn btn-success">Purchase for customer</a>#}
+{#        {% else %}#}
+{#            <a href="#" class="btn btn-success">Purchase</a>#}
+{#        {% endif %}#}
+        <a href="{% url 'UI:home' %}" class="btn btn-secondary">Back to Home</a>
+    </div>
+    <script>
+    let msg = `{% for msg in messages %}{{ msg }}{% endfor %}`
+    console.log(msg)
+    if (msg!==''){
+        document.getElementById('error_detail').innerHTML = msg
+        $('#belowmodal').modal('show')
+        setTimeout(()=>{
+            document.getElementById('error_detail').innerHTML = ''
+            {#$('#belowmodal').modal('toggle')#}
+        },3000)
+
+
+
+    }
+    </script>
+{% endblock %}

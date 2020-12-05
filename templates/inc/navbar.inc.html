@@ -1,0 +1,41 @@
+<div class="bg-info" style="height: 70px;">
+    <div class="container pt-3">
+        <i class="material-icons mb-3 float-left text-info bg-white mr-3"
+           style="border-radius: 100%; padding:5px; font-size:30px; cursor: pointer;" title="Go back" onclick="window.history.back()">keyboard_arrow_left</i>
+        {% if user.is_authenticated %}        
+        <div class="float-left mt-1 text-white">
+            <h4>Hi {{user.first_name}}</h4>
+        </div>
+        {% endif %}
+        <div class="float-right">
+            {% if user.is_authenticated %}
+            <a href="logout">
+                <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-info">Logout</button>
+
+            </a>
+
+            {% else %}
+    
+
+            <div class="dropdown float-right mx-2">
+                <button type="button" class="btn btn-info dropdown-toggle" style="border: solid 1px white; width: 100px;" data-toggle="dropdown">
+                  Register
+                </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="signup/customer">as Customer</a>
+                  <a class="dropdown-item" href="signup/booking-agent">as Booking agent</a>
+                  <a class="dropdown-item" href="signup/airline-staff">as Airline staff</a>
+                </div>
+            </div>
+
+            <a href="login">
+                <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-info">Login</button>
+            </a>
+
+            {% endif %}
+    
+        </div>
+
+    </div>        
+
+</div>
