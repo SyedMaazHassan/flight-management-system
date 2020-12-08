@@ -95,7 +95,7 @@ def create_account(request):
                     contact_number = request.POST['contact_number']
                     gender = request.POST['gender']
                     customer = CustomerDetails.objects.create(user=user, contact_number=contact_number, gender=gender)
-                    setting_account_credit = AccountCredits.objects.create(user=user, account_balance=500)
+                    setting_account_credit = AccountCredits.objects.create(user=user, account_balance=1500)
                     setting_account_credit.save()
                     customer.save()
                 except:
@@ -136,4 +136,4 @@ def login(request):
 
 def logout(request):
     auth.logout(request)
-    return redirect("index")
+    return render(request,"login.html",{'logout':'logout'})

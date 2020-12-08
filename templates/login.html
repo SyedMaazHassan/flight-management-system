@@ -13,6 +13,11 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                {% if logout %}
+                <div class="alert alert-info" role="alert" id="success_logout">
+                    Thank you for logging in!!
+                </div>
+                {% endif %}
                 <form autocomplete="off" style="text-align:center; margin-top: 30px;" action="login" method="POST">
                     {% csrf_token %}
                     <!-- <i class="material-icons pro">account_circle</i> -->
@@ -55,6 +60,11 @@
             $("#success").css('display', '');
         }
     }
+    setTimeout(()=>{
+        $('#success_logout').css('display','none')
+
+    },3000)
+
 
 </script>
 

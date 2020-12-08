@@ -59,17 +59,18 @@ class flight(models.Model):
 
 
 class PurchaseTicket(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_holder',)
-    ticket = models.ForeignKey(flight, on_delete=models.CASCADE, related_name='ticket_booked',unique=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ticket_holder', blank=True, null=True)
+    ticket = models.ForeignKey(flight, on_delete=models.CASCADE, related_name='ticket_booked', unique=False)
     customer_email = models.CharField(max_length=100, default='name')
     ticket_status = models.CharField(max_length=15, choices=[('Pending', 'Pending'), ('Confirmed', 'Confirmed')],
                                      default='Pending')
+    purchase_date = models.DateTimeField(default=datetime.now(), editable=False)
 
     # class Meta:
     #     unique_together = ('user', 'ticket')
 
     def __str__(self):
-        return '{} booked by {}'.format(self.ticket.flight_num, self.user.username)
+        return '{} booked'.format(self.ticket.flight_num)
 
 
 class AccountCredits(models.Model):
@@ -85,14 +86,16 @@ class AccountCredits(models.Model):
         total_price = 0
         customer_spend = 0
         for c_ticket in toatl_confirmed_ticket_purchased:
-            if c_ticket.ticket_status!='Pending':
-                customer_spend +=c_ticket.ticket.price
-
+            if c_ticket.ticket_status != 'Pending' and c_ticket.user is not None:
+                increment = (c_ticket.ticket.price * 10) / 100
+                customer_spend += c_ticket.ticket.price + increment
+            elif c_ticket.ticket.status != 'Pending' and c_ticket.user is None:
+                customer_spend += c_ticket.ticket.price
 
         for ticket in total_tickets_purchased:
             total_price += ticket.ticket.price
 
-        return {'agent_spend':total_price,'customer_spend':customer_spend}
+        return {'agent_spend': total_price, 'customer_spend': customer_spend}
 
     class Meta:
         verbose_name_plural = 'AccountCredit'

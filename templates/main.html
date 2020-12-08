@@ -29,21 +29,40 @@
         </div>
 
     </div>
+    <div class="modal" id="Chartmodal" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 130%;">
+                <div class="modal-header">
+                    <h2>Your spending</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                     </button>
+                </div>
+                <div class="modal-body"  >
+                    <div style="position: relative;height: 100%">
+                        <canvas id="my-history"></canvas>
+                    </div>
 
+                </div>
 
+            </div>
 
+        </div>
 
+    </div>
 
     <div class="container mt-3 mb-3 text-right"  >
 
         <a class="btn btn-info" href="{% url 'UI:all_flights' 'all_Flights' %}">All Flights</a>
+        <button data-target="#Chartmodal" data-toggle="modal" class="btn btn-info">Track my spending</button>
         <a href="{% url 'UI:my_tickets' %}" class="btn btn-info"  >My flights</a>
     </div>
 
     {% block check %}
     <div class="container my-4">
-        <form action="{% url 'UI:home' %}" method="GET" id="form_list" class=" d-flex justify-content-between">
-{#            {{ search.form }}#}
+        <form action="" method="GET"
+              id="form_list" class=" d-flex justify-content-between">
+{#            {{ search.form.as_p }}#}
         <div>
             <label for="d_time">Departure time:</label>
             <input type="datetime-local" value="{{ time1 }}" id="d_time"
@@ -90,7 +109,6 @@
 
             {% endif %}
                     <h3>Remaining: {{ remaining_amount }}$</h3>
-{#                    <a  class="btn btn-info">Add Credit to your account</a>#}
         </div>
     {% endif %}
 
@@ -105,17 +123,14 @@
                         <th>Airline</th>
                         <th>Departure Time</th>
                         <th>Departure Airport</th>
-                        {# Not shown for customer but visible for agent #}
-                        {% ifnotequal user.username  customer.user.username %}
 
                             <th>Details</th>
                         {# shown for customer not for agent #}
-
-                        {% else %}
+                        {% ifequal user.username customer.user.username %}
                             {% if flight_list.items %}
                                 <th>Status</th>
                             {% endif %}
-                        {% endifnotequal %}
+                        {% endifequal %}
 
                     </tr>
                 </thead>
@@ -136,25 +151,24 @@
                             <td>
                                 {{ item.departure_airport }}
                             </td>
-                            {% ifnotequal user.username  customer.user.username %}
                             <td>
                                 <a href="{% url 'UI:flight_detail' item.pk %}" class="btn btn-info">Details</a>
                             </td>
-                            {% else %}
                             {# customer status with conditional button #}
+                        {% ifequal user.username customer.user.username %}
                                 <td>
                                     {{ pending|slice:":7" }}
                                     {% if pending|slice:":7"|last == 'g' %}
-                                    <button class="btn btn-info passing_value" onclick="my_function(event)"
+                                    <button class="btn btn-info passing_value" onclick="button_function(event)"
                                             name="{{ item.pk }}"
-                                            data-toggle="modal" value="{{ item.price }} " id="passing_value"
+                                            data-toggle="modal" value="{{ item.price }}" id="passing_value"
                                             data-target="#statusmodal">Confirm</button>
                                     {% else %}
 
                                     {% endif %}
 
                                 </td>
-                            {% endifnotequal %}
+                        {% endifequal %}
                         </tr>
                     {% endfor %}
 {#      for simple flight list                  #}
@@ -173,18 +187,16 @@
                             <td>
                                 {{ item.departure_airport }}
                             </td>
-                            {% ifnotequal user.username  customer.user.username %}
                             <td>
                                 <a href="{% url 'UI:flight_detail' item.pk %}" class="btn btn-info">Details</a>
                             </td>
-                            {% else %}
+{#                            {% else %}#}
 {#                                {% if item.ticket_status %}#}
-                                <td>
-                                    {{ pending }}
+{#                                <td>#}
+{#                                    {{ pending }}#}
 {#                                    <button><small>Confirm</small></button>#}
-                                </td>
+{#                                </td>#}
 {#                                {% endif %}#}
-                            {% endifnotequal %}
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -205,21 +217,81 @@
         {% endif %}
     {% endblock %}
 </body>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 <script>
    const table_width = document.getElementById('table_width')
    console.log(window.innerWidth)
    if( window.innerWidth<720){
        table_width.classList.add('table-responsive')
    }
-   function my_function(e){
-       const insert_value = document.getElementById('insert')
-       insert_value.value = e.target.value+'$';
-       {# constructing url #}
-       let url = '{% url 'UI:customer_purchase' 1 12  %}'
+   function button_function(e){
+        console.log('this')
+        {#constructing url #}
+       const url = '{% url 'UI:customer_purchase' 1 12  %}'
        let one_change = url.replace('1',e.target.name)
-       const two_change = one_change.replace(12,e.target.value)
+       const price = parseInt(e.target.value)
+       let increment = price
+       increment = (increment*10)/100
+       const new_value = price + increment
+       const insert_value = document.getElementById('insert')
+       insert_value.value = new_value+'$';
+       const two_change = one_change.replace(12,new_value)
         document.getElementById('confirmation').href = two_change
    }
+
+        $(document).ready(function (){
+        var ctx = document.getElementById('my-history').getContext("2d");
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: {{ labels|safe }},
+              datasets: [{
+                barThickness:8,
+                label: 'Price',
+                backgroundColor: 'green',
+                data: {{ data|safe }}
+              }]
+            },
+            options: {
+              responsive: true,
+              legend: {
+                position: 'top',
+              },
+              scales:{
+                  xAxes:[{
+                      display:true,
+                      gridLines:{
+                          drawOnChartArea:false
+                      },
+                      scaleLabel:{
+                          display:true,
+                          labelString:'Year and month'
+                      }
+                  }],
+                  yAxes:[{
+                      display:true,
+
+                      scaleLabel:{
+                          display:true,
+                          labelString:'Price'
+                      },
+                      ticks:{
+                          beginAtZero:true,
+                          steps:10,
+                          {#sax:2000#}
+                      }
+                  }]
+              },
+              title: {
+                display: true,
+                text: 'Amount spend in months'
+              }
+            }
+          });
+
+        }
+    )
 
 
 

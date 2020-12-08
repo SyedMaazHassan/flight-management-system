@@ -22,8 +22,15 @@
                         <h2 class="text-center">Buy tickets</h2>
 
                         <label for="">Customer Email</label>
-                        <input type="text" name="customer_email"  placeholder="Customer Email" class="form-control">
+                        {% if customer.user.username %}
+                            <input type="text" name="customer_email" readonly
+                                   value="{{ customer.user.username }}"
+                               placeholder="Customer Email" class="form-control">
+                        {% else %}
 
+                            <input type="text" name="customer_email"
+                               placeholder="Customer Email" class="form-control">
+                        {% endif %}
                         <label class="mt-3">Choose the flight</label>
                         <select name="flight_information" id="" class="form-control">
 {#                            <option value="">Select your flight</option>#}
@@ -72,15 +79,14 @@
             </div>
 
         </div>
-
+        {% ifnotequal user.username  customer.user.username %}
 
        <button data-toggle="modal" data-target="#belowmodal" class="btn btn-info">Purchase for customer</button>
+        {% else %}
+       <button data-toggle="modal" data-target="#belowmodal" class="btn btn-info">Purchase</button>
 
-{#        {% if user.is_staff %}#}
-{#            <a href="{% url 'UI:ticket_purchase' %}" class="btn btn-success">Purchase for customer</a>#}
-{#        {% else %}#}
-{#            <a href="#" class="btn btn-success">Purchase</a>#}
-{#        {% endif %}#}
+        {% endifnotequal %}
+
         <a href="{% url 'UI:home' %}" class="btn btn-secondary">Back to Home</a>
     </div>
     <script>
@@ -91,10 +97,7 @@
         $('#belowmodal').modal('show')
         setTimeout(()=>{
             document.getElementById('error_detail').innerHTML = ''
-            {#$('#belowmodal').modal('toggle')#}
         },3000)
-
-
 
     }
     </script>

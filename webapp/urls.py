@@ -26,3 +26,7 @@ urlpatterns = [
     path('', include('application.urls')),
 
 ]
+if settings.DEBUG:
+    urlpatterns=[
+        path('___debug__/',include(debug_toolbar.urls))
+    ]+urlpatterns
