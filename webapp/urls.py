@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-import debug_toolbar
+# import debug_toolbar
 from application.views import logout
 
 
@@ -26,7 +26,7 @@ urlpatterns = [
     path('', include('application.urls')),
 
 ]
-if settings.DEBUG:
-    urlpatterns=[
-        path('___debug__/',include(debug_toolbar.urls))
-    ]+urlpatterns
+# if settings.DEBUG:
+#     urlpatterns=[
+#         path('___debug__/',include(debug_toolbar.urls))
+#     ]+urlpatterns

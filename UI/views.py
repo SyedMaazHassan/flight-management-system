@@ -1,19 +1,23 @@
 from django.shortcuts import render, redirect
 from django.views import generic
 from django.contrib import messages
-from .filters import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from application.models import *
 from django.db.models import Q
 from django.urls import reverse_lazy, resolve
-from .filters import *
 from datetime import datetime
+from django.db.models import Count
+from collections import OrderedDict
 
+from django.db.models import Sum
+import operator
 
 # Create your views here.
 def myCharts(request):
+    global new_value
     date = []
     cost = []
+    comission_based = {}
     x = PurchaseTicket.objects.select_related('user').filter(Q(user=request.user)
                                                              | (Q(customer_email=request.user.username) &
                                                                 Q(ticket_status='Confirmed')))
@@ -22,13 +26,27 @@ def myCharts(request):
         y = x.strftime("%Y %m")
         date.append(y)
         price = int(item.ticket.price)
-        if item.user is not None and item.ticket_status!='Pending':
+        new_value = price
+        if item.user is not None and item.ticket_status != 'Pending' and request.user.username == item.customer_email:
             increment = (price * 10) / 100
             new_value = increment + price
-        else:
+        elif request.user.username == item.customer_email:
             new_value = price
+        else:
+            new_value = (price * 10) / 100
+            all_purchased_tickets = PurchaseTicket.objects.select_related('user').\
+                filter(user=request.user)
+            d = all_purchased_tickets.values('customer_email')\
+                .annotate(price=Sum('ticket__price'))
+
+            x = 1
+            sorted_dict = sorted(d,key=lambda i:i['price'],reverse=True)
+            for i in sorted_dict:
+                comission_based[x] = i
+                x+=1
+        print(comission_based)
         cost.append(new_value)
-    return {'labels': date, 'data': cost}
+    return {'labels': date, 'data': cost, 'comission': comission_based}
 
 
 class SearchAndListView(LoginRequiredMixin, generic.ListView):
@@ -48,10 +66,10 @@ class SearchAndListView(LoginRequiredMixin, generic.ListView):
         if chart_data:
             ctx['labels'] = chart_data['labels']
             ctx['data'] = chart_data['data']
+            ctx['comission'] = chart_data['comission']
         customer = CustomerDetails.objects.select_related('user').filter(user=self.request.user)
         if customer:
             ctx['customer'] = customer[0]
-        print(customer)
         return ctx
 
     def get_queryset(self, *args, **kwargs):
