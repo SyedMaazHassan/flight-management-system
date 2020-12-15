@@ -12,6 +12,7 @@ from collections import OrderedDict
 from django.db.models import Sum
 import operator
 
+
 # Create your views here.
 def myCharts(request):
     global new_value
@@ -34,17 +35,16 @@ def myCharts(request):
             new_value = price
         else:
             new_value = (price * 10) / 100
-            all_purchased_tickets = PurchaseTicket.objects.select_related('user').\
+            all_purchased_tickets = PurchaseTicket.objects.select_related('user'). \
                 filter(user=request.user)
-            d = all_purchased_tickets.values('customer_email')\
+            d = all_purchased_tickets.values('customer_email') \
                 .annotate(price=Sum('ticket__price'))
 
             x = 1
-            sorted_dict = sorted(d,key=lambda i:i['price'],reverse=True)
-            for i in sorted_dict:
+            sorted_dict = sorted(d, key=lambda i: i['price'], reverse=True)
+            for i in sorted_dict[:5]:
                 comission_based[x] = i
-                x+=1
-        print(comission_based)
+                x += 1
         cost.append(new_value)
     return {'labels': date, 'data': cost, 'comission': comission_based}
 
